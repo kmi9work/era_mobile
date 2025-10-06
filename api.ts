@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { Player, AuthResponse } from './types';
+import { Player, AuthResponse, Resource, ExchangeRequest, ExchangeResponse } from './types';
 
 const API_BASE_URL = __DEV__ 
-  ? 'http://192.168.1.101:3000'  // Для разработки (IP вместо localhost)
+  ? 'http://192.168.1.45:3000'  // Для разработки (IP сервера)
   : 'https://your-production-domain.com'; // Для продакшена
 
 class ApiService {
@@ -12,15 +12,36 @@ class ApiService {
     headers: {
       'Content-Type': 'application/json',
     },
-    withCredentials: true, // Для поддержки сессий Rails
+    withCredentials: false, // Отключаем для мобильных приложений
   });
 
   constructor() {
     // Интерцептор для обработки ответов
     this.api.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        console.log('API Success:', response.config.url, response.status);
+        return response;
+      },
       (error) => {
-        console.error('API Error:', error.message);
+        console.error('API Error:', {
+          url: error.config?.url,
+          method: error.config?.method,
+          status: error.response?.status,
+          message: error.message,
+          data: error.response?.data
+        });
+        return Promise.reject(error);
+      }
+    );
+
+    // Интерцептор для запросов
+    this.api.interceptors.request.use(
+      (config) => {
+        console.log('API Request:', config.method?.toUpperCase(), config.url);
+        return config;
+      },
+      (error) => {
+        console.error('API Request Error:', error);
         return Promise.reject(error);
       }
     );
@@ -87,6 +108,43 @@ class ApiService {
     } catch (error) {
       console.error('Get current player error:', error);
       return null;
+    }
+  }
+
+  // Получение ресурсов игрока
+  async getPlayerResources(playerId: number): Promise<Resource[]> {
+    try {
+      const response = await this.api.get(`/players/${playerId}/show_players_resources`);
+      return response.data || [];
+    } catch (error: any) {
+      console.error('Get player resources error:', error);
+      // Возвращаем тестовые данные для разработки
+      return [
+        { identificator: 'gold', count: 1000 },
+        { identificator: 'timber', count: 500 },
+        { identificator: 'stone', count: 300 },
+        { identificator: 'food', count: 800 },
+        { identificator: 'metal', count: 200 },
+        { identificator: 'gems', count: 50 },
+        { identificator: 'armor', count: 10 },
+        { identificator: 'weapon', count: 15 }
+      ];
+    }
+  }
+
+  // Обмен ресурсами
+  async exchangeResources(playerId: number, request: ExchangeRequest): Promise<ExchangeResponse> {
+    try {
+      const response = await this.api.post(`/players/${playerId}/exchange_resources`, {
+        request
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Exchange resources error:', error);
+      return {
+        success: false,
+        error: error.response?.data?.error || error.message || 'Ошибка обмена ресурсами'
+      };
     }
   }
 }
