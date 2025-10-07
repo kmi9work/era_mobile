@@ -4,14 +4,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
-  Dimensions
+  Alert
 } from 'react-native';
 import { Resource } from '../types';
 import ResourceIcon from './ResourceIcon';
 import CustomNumericKeyboard from './CustomNumericKeyboard';
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface ResourceQuantitySelectorProps {
   resource: Resource;
@@ -24,8 +21,8 @@ const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
   onConfirm,
   onCancel
 }) => {
-  const [quantity, setQuantity] = useState<number>(1);
-  const [inputValue, setInputValue] = useState<string>('1');
+  const [quantity, setQuantity] = useState<number>(0);
+  const [inputValue, setInputValue] = useState<string>('0');
 
   const handleNumberPress = (number: string) => {
     const newValue = inputValue === '0' ? number : inputValue + number;
@@ -118,7 +115,7 @@ const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
             <View style={styles.resourceHeader}>
               <ResourceIcon 
                 identificator={resource.identificator} 
-                size={Math.min(screenWidth * 0.15, 64)}
+                size={64}
               />
               <View style={styles.resourceDetails}>
                 <Text style={styles.resourceName}>
@@ -195,8 +192,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: screenWidth * 0.05,
-    paddingTop: screenHeight * 0.06,
+    padding: 20,
+    paddingTop: 50,
     backgroundColor: '#1976d2',
   },
   backButton: {
@@ -205,11 +202,11 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     color: 'white',
-    fontSize: Math.min(screenWidth * 0.04, 16),
+    fontSize: 16,
     fontWeight: '600',
   },
   title: {
-    fontSize: Math.min(screenWidth * 0.05, 20),
+    fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
   },
@@ -218,13 +215,13 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: screenWidth * 0.05,
+    padding: 20,
   },
   resourceInfo: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: screenWidth * 0.05,
-    marginBottom: screenHeight * 0.02,
+    padding: 20,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -236,24 +233,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   resourceDetails: {
-    marginLeft: screenWidth * 0.05,
+    marginLeft: 20,
     flex: 1,
   },
   resourceName: {
-    fontSize: Math.min(screenWidth * 0.06, 24),
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 5,
   },
   availableCount: {
-    fontSize: Math.min(screenWidth * 0.04, 16),
+    fontSize: 16,
     color: '#666',
   },
   quantitySection: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: screenWidth * 0.05,
-    marginBottom: screenHeight * 0.02,
+    padding: 20,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -261,15 +258,15 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   quantityTitle: {
-    fontSize: Math.min(screenWidth * 0.045, 18),
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 5,
   },
   quantitySubtitle: {
-    fontSize: Math.min(screenWidth * 0.035, 14),
+    fontSize: 14,
     color: '#666',
-    marginBottom: screenHeight * 0.02,
+    marginBottom: 20,
     fontStyle: 'italic',
   },
   quantityDisplay: {
@@ -279,51 +276,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    flexWrap: 'wrap',
   },
   quantityButton: {
     backgroundColor: '#1976d2',
-    width: Math.min(screenWidth * 0.12, 50),
-    height: Math.min(screenWidth * 0.12, 50),
-    borderRadius: Math.min(screenWidth * 0.06, 25),
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantityButtonText: {
     color: 'white',
-    fontSize: Math.min(screenWidth * 0.06, 24),
+    fontSize: 24,
     fontWeight: 'bold',
   },
   quantityInputContainer: {
-    marginHorizontal: screenWidth * 0.04,
-    minWidth: screenWidth * 0.2,
+    marginHorizontal: 20,
+    minWidth: 80,
     borderWidth: 2,
     borderColor: '#1976d2',
     borderRadius: 8,
-    paddingVertical: screenHeight * 0.015,
-    paddingHorizontal: screenWidth * 0.04,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     backgroundColor: 'white',
   },
   quantityInput: {
-    fontSize: Math.min(screenWidth * 0.06, 24),
+    fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#333',
   },
   maxButton: {
     backgroundColor: '#ff9800',
-    paddingHorizontal: screenWidth * 0.04,
-    paddingVertical: screenHeight * 0.015,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 8,
-    marginLeft: screenWidth * 0.04,
+    marginLeft: 20,
   },
   maxButtonText: {
     color: 'white',
-    fontSize: Math.min(screenWidth * 0.04, 16),
+    fontSize: 16,
     fontWeight: 'bold',
   },
   keyboardContainer: {
-    paddingBottom: screenHeight * 0.05, // Отступ снизу, чтобы кнопка "Готово" не залезала на системные кнопки
+    paddingBottom: 40, // Отступ снизу, чтобы кнопка "Готово" не залезала на системные кнопки
   },
 });
 
