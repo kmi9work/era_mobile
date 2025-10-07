@@ -16,7 +16,7 @@ interface CustomNumericKeyboardProps {
 }
 
 const { width } = Dimensions.get('window');
-const buttonSize = (width - 60) / 3; // 3 кнопки в ряду с отступами
+const buttonSize = (width - 80) / 3; // 3 кнопки в ряду с отступами
 
 const CustomNumericKeyboard: React.FC<CustomNumericKeyboardProps> = ({
   onNumberPress,
@@ -108,22 +108,20 @@ const CustomNumericKeyboard: React.FC<CustomNumericKeyboardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#f0f0f0',
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
+    backgroundColor: 'transparent',
+    padding: 0,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 6,
   },
   confirmRow: {
-    marginTop: 5,
+    marginTop: 3,
   },
   numberButton: {
     width: buttonSize,
-    height: 50,
+    height: 44,
     backgroundColor: 'white',
     borderRadius: 8,
     justifyContent: 'center',
@@ -136,11 +134,11 @@ const styles = StyleSheet.create({
   },
   zeroButton: {
     flex: 1,
-    marginRight: 10,
+    marginRight: 6,
   },
   actionButton: {
     width: buttonSize,
-    height: 50,
+    height: 44,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -152,13 +150,13 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: '#ff9800',
-    marginRight: 10,
+    marginRight: 6,
   },
   clearButton: {
     backgroundColor: '#f44336',
   },
   confirmButton: {
-    height: 50,
+    height: 44,
     backgroundColor: '#4caf50',
     borderRadius: 8,
     justifyContent: 'center',
@@ -170,17 +168,17 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   numberButtonText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
   actionButtonText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
   },
   confirmButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
   },

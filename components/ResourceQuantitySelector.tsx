@@ -110,74 +110,51 @@ const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
       </View>
 
       <View style={styles.content}>
-          {/* Информация о ресурсе */}
-          <View style={styles.resourceInfo}>
-            <View style={styles.resourceHeader}>
-              <ResourceIcon 
-                identificator={resource.identificator} 
-                size={64}
-              />
-              <View style={styles.resourceDetails}>
-                <Text style={styles.resourceName}>
-                  {getResourceDisplayName(resource.identificator)}
-                </Text>
-                <Text style={styles.availableCount}>
-                  Доступно: {resource.count}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-        {/* Выбор количества */}
-        <View style={styles.quantitySection}>
-          <Text style={styles.quantityTitle}>Выберите количество</Text>
-          <Text style={styles.quantitySubtitle}>
-            Используйте цифровую клавиатуру ниже или кнопки +/-
-          </Text>
-          
-          <View style={styles.quantityDisplay}>
-            <View style={styles.quantityControls}>
-              <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={handleDecrement}
-              >
-                <Text style={styles.quantityButtonText}>-</Text>
-              </TouchableOpacity>
-              
-              <View style={styles.quantityInputContainer}>
-                <Text style={styles.quantityInput}>
-                  {inputValue}
-                </Text>
-              </View>
-              
-              <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={handleIncrement}
-              >
-                <Text style={styles.quantityButtonText}>+</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.maxButton}
-                onPress={handleMax}
-              >
-                <Text style={styles.maxButtonText}>Max</Text>
-              </TouchableOpacity>
+        {/* Информация о ресурсе */}
+        <View style={styles.resourceInfo}>
+          <View style={styles.resourceHeader}>
+            <ResourceIcon 
+              identificator={resource.identificator} 
+              size={50}
+            />
+            <View style={styles.resourceDetails}>
+              <Text style={styles.resourceName}>
+                {getResourceDisplayName(resource.identificator)}
+              </Text>
+              <Text style={styles.availableCount}>
+                Доступно: {resource.count}
+              </Text>
             </View>
           </View>
         </View>
 
-      </View>
+        {/* Выбор количества с клавиатурой */}
+        <View style={styles.quantitySection}>
+          <View style={styles.quantityHeader}>
+            <Text style={styles.quantityTitle}>Выберите количество</Text>
+            <TouchableOpacity
+              style={styles.maxButton}
+              onPress={handleMax}
+            >
+              <Text style={styles.maxButtonText}>Все ({resource.count})</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.quantityDisplayLarge}>
+            <Text style={styles.quantityInputLarge}>
+              {inputValue}
+            </Text>
+          </View>
 
-      {/* Собственная цифровая клавиатура */}
-      <View style={styles.keyboardContainer}>
-        <CustomNumericKeyboard
-          onNumberPress={handleNumberPress}
-          onDeletePress={handleDeletePress}
-          onClearPress={handleClearPress}
-          onConfirmPress={handleConfirm}
-          disabled={false}
-        />
+          {/* Встроенная цифровая клавиатура */}
+          <CustomNumericKeyboard
+            onNumberPress={handleNumberPress}
+            onDeletePress={handleDeletePress}
+            onClearPress={handleClearPress}
+            onConfirmPress={handleConfirm}
+            disabled={false}
+          />
+        </View>
       </View>
     </View>
   );
@@ -192,36 +169,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 50,
+    padding: 15,
+    paddingTop: 40,
     backgroundColor: '#1976d2',
   },
   backButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   backButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
   },
   placeholder: {
-    width: 60,
+    width: 50,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: 15,
   },
   resourceInfo: {
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -233,93 +210,67 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   resourceDetails: {
-    marginLeft: 20,
+    marginLeft: 15,
     flex: 1,
   },
   resourceName: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 5,
+    marginBottom: 4,
   },
   availableCount: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
   },
   quantitySection: {
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: 10,
+    padding: 12,
+    flex: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
+  quantityHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   quantityTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 5,
   },
-  quantitySubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 20,
-    fontStyle: 'italic',
-  },
-  quantityDisplay: {
-    alignItems: 'center',
-  },
-  quantityControls: {
-    flexDirection: 'row',
+  quantityDisplayLarge: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  quantityButton: {
-    backgroundColor: '#1976d2',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantityButtonText: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  quantityInputContainer: {
-    marginHorizontal: 20,
-    minWidth: 80,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    paddingVertical: 15,
+    marginBottom: 15,
     borderWidth: 2,
     borderColor: '#1976d2',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: 'white',
   },
-  quantityInput: {
-    fontSize: 24,
+  quantityInputLarge: {
+    fontSize: 48,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#333',
+    color: '#1976d2',
   },
   maxButton: {
     backgroundColor: '#ff9800',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginLeft: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
   },
   maxButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: 'bold',
-  },
-  keyboardContainer: {
-    paddingBottom: 40, // Отступ снизу, чтобы кнопка "Готово" не залезала на системные кнопки
   },
 });
 
