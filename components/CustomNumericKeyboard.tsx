@@ -15,8 +15,8 @@ interface CustomNumericKeyboardProps {
   disabled?: boolean;
 }
 
-const { width } = Dimensions.get('window');
-const buttonSize = (width - 60) / 3; // 3 кнопки в ряду с отступами
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const buttonSize = Math.min((screenWidth - 60) / 3, screenHeight * 0.08); // 3 кнопки в ряду с отступами
 
 const CustomNumericKeyboard: React.FC<CustomNumericKeyboardProps> = ({
   onNumberPress,
@@ -109,21 +109,21 @@ const CustomNumericKeyboard: React.FC<CustomNumericKeyboardProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#f0f0f0',
-    padding: 10,
+    padding: screenWidth * 0.025,
     borderTopWidth: 1,
     borderTopColor: '#ddd',
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: screenHeight * 0.01,
   },
   confirmRow: {
-    marginTop: 5,
+    marginTop: screenHeight * 0.005,
   },
   numberButton: {
     width: buttonSize,
-    height: 50,
+    height: buttonSize,
     backgroundColor: 'white',
     borderRadius: 8,
     justifyContent: 'center',
@@ -136,11 +136,11 @@ const styles = StyleSheet.create({
   },
   zeroButton: {
     flex: 1,
-    marginRight: 10,
+    marginRight: screenWidth * 0.025,
   },
   actionButton: {
     width: buttonSize,
-    height: 50,
+    height: buttonSize,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -152,13 +152,13 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: '#ff9800',
-    marginRight: 10,
+    marginRight: screenWidth * 0.025,
   },
   clearButton: {
     backgroundColor: '#f44336',
   },
   confirmButton: {
-    height: 50,
+    height: buttonSize,
     backgroundColor: '#4caf50',
     borderRadius: 8,
     justifyContent: 'center',
@@ -170,17 +170,17 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   numberButtonText: {
-    fontSize: 24,
+    fontSize: Math.min(buttonSize * 0.45, 24),
     fontWeight: 'bold',
     color: '#333',
   },
   actionButtonText: {
-    fontSize: 20,
+    fontSize: Math.min(buttonSize * 0.4, 20),
     fontWeight: 'bold',
     color: 'white',
   },
   confirmButtonText: {
-    fontSize: 18,
+    fontSize: Math.min(buttonSize * 0.35, 18),
     fontWeight: 'bold',
     color: 'white',
   },

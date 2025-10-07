@@ -4,11 +4,14 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert
+  Alert,
+  Dimensions
 } from 'react-native';
 import { Resource } from '../types';
 import ResourceIcon from './ResourceIcon';
 import CustomNumericKeyboard from './CustomNumericKeyboard';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface ResourceQuantitySelectorProps {
   resource: Resource;
@@ -115,7 +118,7 @@ const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
             <View style={styles.resourceHeader}>
               <ResourceIcon 
                 identificator={resource.identificator} 
-                size={64}
+                size={Math.min(screenWidth * 0.15, 64)}
               />
               <View style={styles.resourceDetails}>
                 <Text style={styles.resourceName}>
@@ -192,8 +195,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 50,
+    padding: screenWidth * 0.05,
+    paddingTop: screenHeight * 0.06,
     backgroundColor: '#1976d2',
   },
   backButton: {
@@ -202,11 +205,11 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: Math.min(screenWidth * 0.04, 16),
     fontWeight: '600',
   },
   title: {
-    fontSize: 20,
+    fontSize: Math.min(screenWidth * 0.05, 20),
     fontWeight: 'bold',
     color: 'white',
   },
@@ -215,13 +218,13 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: screenWidth * 0.05,
   },
   resourceInfo: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
+    padding: screenWidth * 0.05,
+    marginBottom: screenHeight * 0.02,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -233,24 +236,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   resourceDetails: {
-    marginLeft: 20,
+    marginLeft: screenWidth * 0.05,
     flex: 1,
   },
   resourceName: {
-    fontSize: 24,
+    fontSize: Math.min(screenWidth * 0.06, 24),
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 5,
   },
   availableCount: {
-    fontSize: 16,
+    fontSize: Math.min(screenWidth * 0.04, 16),
     color: '#666',
   },
   quantitySection: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
+    padding: screenWidth * 0.05,
+    marginBottom: screenHeight * 0.02,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -258,15 +261,15 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   quantityTitle: {
-    fontSize: 18,
+    fontSize: Math.min(screenWidth * 0.045, 18),
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 5,
   },
   quantitySubtitle: {
-    fontSize: 14,
+    fontSize: Math.min(screenWidth * 0.035, 14),
     color: '#666',
-    marginBottom: 20,
+    marginBottom: screenHeight * 0.02,
     fontStyle: 'italic',
   },
   quantityDisplay: {
@@ -276,50 +279,51 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    flexWrap: 'wrap',
   },
   quantityButton: {
     backgroundColor: '#1976d2',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: Math.min(screenWidth * 0.12, 50),
+    height: Math.min(screenWidth * 0.12, 50),
+    borderRadius: Math.min(screenWidth * 0.06, 25),
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantityButtonText: {
     color: 'white',
-    fontSize: 24,
+    fontSize: Math.min(screenWidth * 0.06, 24),
     fontWeight: 'bold',
   },
   quantityInputContainer: {
-    marginHorizontal: 20,
-    minWidth: 80,
+    marginHorizontal: screenWidth * 0.04,
+    minWidth: screenWidth * 0.2,
     borderWidth: 2,
     borderColor: '#1976d2',
     borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: screenHeight * 0.015,
+    paddingHorizontal: screenWidth * 0.04,
     backgroundColor: 'white',
   },
   quantityInput: {
-    fontSize: 24,
+    fontSize: Math.min(screenWidth * 0.06, 24),
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#333',
   },
   maxButton: {
     backgroundColor: '#ff9800',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: screenWidth * 0.04,
+    paddingVertical: screenHeight * 0.015,
     borderRadius: 8,
-    marginLeft: 20,
+    marginLeft: screenWidth * 0.04,
   },
   maxButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: Math.min(screenWidth * 0.04, 16),
     fontWeight: 'bold',
   },
   keyboardContainer: {
-    paddingBottom: 40, // Отступ снизу, чтобы кнопка "Готово" не залезала на системные кнопки
+    paddingBottom: screenHeight * 0.05, // Отступ снизу, чтобы кнопка "Готово" не залезала на системные кнопки
   },
 });
 
