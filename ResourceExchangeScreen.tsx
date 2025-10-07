@@ -4,16 +4,17 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   TextInput,
   Alert,
   Modal,
-  ActivityIndicator
+  ActivityIndicator,
+  ScrollView
 } from 'react-native';
 import { Player, Resource } from './types';
 import QRCodeScanner from './QRCodeScanner';
 import ApiService from './api';
 import ResourceIcon from './components/ResourceIcon';
+import ResourceQuantitySelector from './components/ResourceQuantitySelector';
 
 interface ResourceExchangeScreenProps {
   player: Player;
@@ -31,6 +32,8 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isExchanging, setIsExchanging] = useState(false);
+  const [step, setStep] = useState<'select_recipient' | 'select_resources' | 'select_quantity'>('select_recipient');
+  const [selectedResourceForQuantity, setSelectedResourceForQuantity] = useState<Resource | null>(null);
 
   useEffect(() => {
     loadPlayerResources();
@@ -49,64 +52,76 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
   };
 
   const handleResourceSelect = (resource: Resource) => {
-    const existing = selectedResources.find(r => r.identificator === resource.identificator);
+    // Открываем экран выбора количества для этого ресурса
+    setSelectedResourceForQuantity(resource);
+    setStep('select_quantity');
+  };
+
+  const handleQuantityConfirm = (quantity: number) => {
+    if (!selectedResourceForQuantity) return;
+
+    const existing = selectedResources.find(r => r.identificator === selectedResourceForQuantity.identificator);
     if (existing) {
-      // Увеличиваем количество на 1, но не больше доступного
-      const newCount = Math.min(existing.selectedCount + 1, resource.count);
+      // Обновляем существующий ресурс
       setSelectedResources(prev => 
         prev.map(r => 
-          r.identificator === resource.identificator 
-            ? { ...r, selectedCount: newCount }
+          r.identificator === selectedResourceForQuantity.identificator 
+            ? { ...r, selectedCount: quantity }
             : r
         )
       );
     } else {
-      // Добавляем новый ресурс с количеством 1
+      // Добавляем новый ресурс
       setSelectedResources(prev => [...prev, {
-        ...resource,
-        selectedCount: 1
+        ...selectedResourceForQuantity,
+        selectedCount: quantity
       }]);
     }
+
+    // Возвращаемся к экрану выбора ресурсов
+    setSelectedResourceForQuantity(null);
+    setStep('select_resources');
+  };
+
+  const handleQuantityCancel = () => {
+    setSelectedResourceForQuantity(null);
+    setStep('select_resources');
   };
 
   const handleResourceDeselect = (identificator: string) => {
     setSelectedResources(prev => prev.filter(r => r.identificator !== identificator));
   };
 
-  const updateSelectedCount = (identificator: string, count: number) => {
-    const resource = resources.find(r => r.identificator === identificator);
-    if (!resource) return;
-
-    const newCount = Math.max(0, Math.min(count, resource.count));
-    setSelectedResources(prev => 
-      prev.map(r => 
-        r.identificator === identificator 
-          ? { ...r, selectedCount: newCount }
-          : r
-      )
-    );
-  };
-
   const handleQRScan = (data: string) => {
     setRecipientId(data);
     setShowQRScanner(false);
+    // Переходим к выбору ресурсов после выбора получателя
+    setStep('select_resources');
   };
 
-  const handleExchange = async () => {
+  const handleRecipientConfirm = () => {
     if (!recipientId.trim()) {
       Alert.alert('Ошибка', 'Укажите получателя ресурсов');
       return;
     }
+    setStep('select_resources');
+  };
 
+  const handleCancelRecipient = () => {
+    setRecipientId('');
+    setStep('select_recipient');
+  };
+
+  const handleExchange = async () => {
     if (selectedResources.length === 0) {
       Alert.alert('Ошибка', 'Выберите ресурсы для передачи');
       return;
     }
 
     Alert.alert(
-      'Подтверждение обмена',
+      'Подтверждение передачи',
       `Передать ресурсы игроку ${recipientId}?\n\n${selectedResources.map(r => 
-        `${r.identificator}: ${r.selectedCount}`
+        `${getResourceDisplayName(r.identificator)}: ${r.selectedCount}`
       ).join('\n')}`,
       [
         { text: 'Отмена', style: 'cancel' },
@@ -166,20 +181,22 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
     );
   }
 
-  return (
+  const renderSelectRecipientStep = () => (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <Text style={styles.backButtonText}>← Назад</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Обмен ресурсами</Text>
+        <Text style={styles.title}>Выбор получателя</Text>
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content}>
-        {/* Получатель */}
+      <View style={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Получатель</Text>
+          <Text style={styles.sectionTitle}>Выберите получателя ресурсов</Text>
+          <Text style={styles.sectionSubtitle}>
+            Введите идентификатор игрока или отсканируйте QR-код
+          </Text>
           <View style={styles.recipientContainer}>
             <TextInput
               style={styles.recipientInput}
@@ -196,11 +213,44 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
               <Text style={styles.qrButtonText}>📷</Text>
             </TouchableOpacity>
           </View>
+          
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.confirmButton, !recipientId.trim() && styles.confirmButtonDisabled]}
+              onPress={handleRecipientConfirm}
+              disabled={!recipientId.trim()}
+            >
+              <Text style={styles.confirmButtonText}>Продолжить</Text>
+            </TouchableOpacity>
+          </View>
         </View>
+      </View>
+    </View>
+  );
 
+  const renderSelectResourcesStep = () => (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={handleCancelRecipient}>
+          <Text style={styles.backButtonText}>← Назад</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>Выбор ресурсов</Text>
+        <View style={styles.placeholder} />
+      </View>
+
+      <View style={styles.recipientInfo}>
+        <Text style={styles.recipientInfoText}>
+          Получатель: {recipientId}
+        </Text>
+      </View>
+
+      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         {/* Доступные ресурсы */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Доступные ресурсы</Text>
+          <Text style={styles.sectionSubtitle}>
+            Нажмите на ресурс для выбора количества
+          </Text>
           {resources.map((resource) => (
             <TouchableOpacity
               key={resource.identificator}
@@ -222,7 +272,7 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
                   Доступно: {resource.count}
                 </Text>
               </View>
-              <Text style={styles.addButton}>+</Text>
+              <Text style={styles.addButton}>→</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -243,23 +293,9 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
                       {getResourceDisplayName(resource.identificator)}
                     </Text>
                   </View>
-                  <View style={styles.countContainer}>
-                    <TouchableOpacity
-                      style={styles.countButton}
-                      onPress={() => updateSelectedCount(resource.identificator, resource.selectedCount - 1)}
-                      disabled={isExchanging}
-                    >
-                      <Text style={styles.countButtonText}>-</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.countText}>{resource.selectedCount}</Text>
-                    <TouchableOpacity
-                      style={styles.countButton}
-                      onPress={() => updateSelectedCount(resource.identificator, resource.selectedCount + 1)}
-                      disabled={isExchanging}
-                    >
-                      <Text style={styles.countButtonText}>+</Text>
-                    </TouchableOpacity>
-                  </View>
+                  <Text style={styles.selectedCount}>
+                    Количество: {resource.selectedCount}
+                  </Text>
                 </View>
                 <TouchableOpacity
                   style={styles.removeButton}
@@ -273,11 +309,11 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
           </View>
         )}
 
-        {/* Кнопка обмена */}
+        {/* Кнопка передачи */}
         <TouchableOpacity
-          style={[styles.exchangeButton, isExchanging && styles.exchangeButtonDisabled]}
+          style={[styles.exchangeButton, (isExchanging || selectedResources.length === 0) && styles.exchangeButtonDisabled]}
           onPress={handleExchange}
-          disabled={isExchanging || selectedResources.length === 0 || !recipientId.trim()}
+          disabled={isExchanging || selectedResources.length === 0}
         >
           {isExchanging ? (
             <ActivityIndicator color="white" />
@@ -289,7 +325,21 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
         {/* Дополнительный отступ для системных кнопок */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
+    </View>
+  );
 
+  return (
+    <>
+      {step === 'select_recipient' && renderSelectRecipientStep()}
+      {step === 'select_resources' && renderSelectResourcesStep()}
+      {step === 'select_quantity' && selectedResourceForQuantity && (
+        <ResourceQuantitySelector
+          resource={selectedResourceForQuantity}
+          onConfirm={handleQuantityConfirm}
+          onCancel={handleQuantityCancel}
+        />
+      )}
+      
       {/* QR Scanner Modal */}
       <Modal
         visible={showQRScanner}
@@ -301,7 +351,7 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
           onClose={() => setShowQRScanner(false)}
         />
       </Modal>
-    </View>
+    </>
   );
 };
 
@@ -346,9 +396,15 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 60,
   },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   content: {
     flex: 1,
+  },
+  scrollContent: {
     padding: 20,
+    paddingBottom: 60,
   },
   section: {
     backgroundColor: 'white',
@@ -365,7 +421,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 5,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#666',
     marginBottom: 15,
+    fontStyle: 'italic',
   },
   recipientContainer: {
     flexDirection: 'row',
@@ -447,6 +509,11 @@ const styles = StyleSheet.create({
     color: '#333',
     marginLeft: 10,
   },
+  selectedCount: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
   countContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -470,6 +537,31 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     minWidth: 30,
     textAlign: 'center',
+  },
+  countInput: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginHorizontal: 15,
+    minWidth: 50,
+    textAlign: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: 'white',
+  },
+  maxButton: {
+    backgroundColor: '#ff9800',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginLeft: 10,
+  },
+  maxButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   removeButton: {
     backgroundColor: '#f44336',
@@ -501,7 +593,52 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   bottomSpacer: {
-    height: 100, // Дополнительный отступ для системных кнопок
+    height: 150, // Дополнительный отступ для системных кнопок и клавиатуры
+  },
+  recipientInfo: {
+    backgroundColor: '#e3f2fd',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1976d2',
+  },
+  recipientInfoText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1976d2',
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    gap: 15,
+  },
+  confirmButton: {
+    backgroundColor: '#4caf50',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
+  },
+  confirmButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  confirmButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    backgroundColor: '#f44336',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
+  },
+  cancelButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 
