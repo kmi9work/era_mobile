@@ -111,20 +111,20 @@ const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
 
       <View style={styles.content}>
         {/* Информация о ресурсе */}
-        <View style={styles.resourceInfo}>
-          <View style={styles.resourceHeader}>
+        <View style={styles.resourceCard}>
+          <View style={styles.resourceInfo}>
             <ResourceIcon 
               identificator={resource.identificator} 
-              size={50}
+              size={48}
             />
             <View style={styles.resourceDetails}>
               <Text style={styles.resourceName}>
-                {getResourceDisplayName(resource.identificator)}
-              </Text>
-              <Text style={styles.availableCount}>
-                Доступно: {resource.count}
+                {resource.name || getResourceDisplayName(resource.identificator)}
               </Text>
             </View>
+          </View>
+          <View style={styles.resourceCount}>
+            <Text style={styles.resourceCountText}>{resource.count}</Text>
           </View>
         </View>
 
@@ -194,34 +194,47 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 15,
   },
-  resourceInfo: {
+  resourceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 15,
-    marginBottom: 1,
+    marginBottom: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  resourceHeader: {
+  resourceInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   resourceDetails: {
     marginLeft: 15,
     flex: 1,
   },
   resourceName: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 4,
   },
-  availableCount: {
+  resourceCount: {
+    minWidth: 60,
+    height: 30,
+    backgroundColor: '#1976d2',
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  resourceCountText: {
+    color: 'white',
     fontSize: 14,
-    color: '#666',
+    fontWeight: 'bold',
   },
   quantitySection: {
     backgroundColor: 'white',

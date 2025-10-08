@@ -133,6 +133,7 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
               const request = {
                 with_whom: recipientId,
                 hashed_resources: selectedResources.map(r => ({
+                  name: r.name,
                   identificator: r.identificator,
                   count: r.selectedCount
                 }))
@@ -349,6 +350,9 @@ const ResourceExchangeScreen: React.FC<ResourceExchangeScreenProps> = ({ player,
         <QRCodeScanner
           onScan={handleQRScan}
           onClose={() => setShowQRScanner(false)}
+          confirmBeforeLogin={true}
+          confirmTitle="Выбор получателя"
+          confirmMessage="Передать ресурсы игроку с ID"
         />
       </Modal>
     </>

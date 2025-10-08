@@ -13,11 +13,23 @@ import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 interface QRCodeScannerProps {
   onScan: (data: string) => void;
   onClose: () => void;
+  confirmBeforeLogin?: boolean;
+  confirmTitle?: string;
+  confirmMessage?: string;
 }
 
-const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScan, onClose }) => {
+const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ 
+  onScan, 
+  onClose, 
+  confirmBeforeLogin = false,
+  confirmTitle = 'Подтверждение',
+  confirmMessage = 'Использовать этот идентификатор'
+}) => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const [scannedData, setScannedData] = useState<string>('');
+  const [displayName, setDisplayName] = useState<string>('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const hasPermission = permission?.granted;
 
@@ -37,19 +49,53 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScan, onClose }) => {
                              qrData.id ||
                              qrData.player_name; // Fallback на player_name
         
+        // Извлекаем имя игрока для отображения
+        const playerName = qrData.player_name || qrData.name || identificator;
+        
         if (identificator) {
-          onScan(identificator);
+          if (confirmBeforeLogin) {
+            setScannedData(identificator);
+            setDisplayName(playerName);
+            setShowConfirmDialog(true);
+          } else {
+            onScan(identificator);
+          }
         } else {
           Alert.alert('Ошибка', 'QR-код не содержит идентификатор игрока');
+          setScanned(false);
         }
       } else {
         // Если это не JSON, возможно это просто идентификатор
-        onScan(data);
+        if (confirmBeforeLogin) {
+          setScannedData(data);
+          setDisplayName(data);
+          setShowConfirmDialog(true);
+        } else {
+          onScan(data);
+        }
       }
     } catch (error) {
       // Если не JSON, используем данные как есть
-      onScan(data);
+      if (confirmBeforeLogin) {
+        setScannedData(data);
+        setDisplayName(data);
+        setShowConfirmDialog(true);
+      } else {
+        onScan(data);
+      }
     }
+  };
+
+  const handleConfirm = () => {
+    setShowConfirmDialog(false);
+    onScan(scannedData);
+  };
+
+  const handleCancel = () => {
+    setShowConfirmDialog(false);
+    setScanned(false);
+    setScannedData('');
+    setDisplayName('');
   };
 
   if (!permission) {
@@ -91,25 +137,49 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScan, onClose }) => {
         />
         
         <View style={styles.overlay}>
-          <View style={styles.scanArea} />
+          <View style={[styles.scanArea, scanned && styles.scanAreaScanned]} />
         </View>
         
-        <Text style={styles.instruction}>
-          Наведите камеру на QR-код для входа в игру
-        </Text>
+        {!scanned && (
+          <Text style={styles.instruction}>
+            Наведите камеру на QR-код
+          </Text>
+        )}
+        
+        {/* Диалог подтверждения поверх камеры */}
+        {showConfirmDialog && (
+          <View style={styles.confirmDialogOverlay}>
+            <View style={styles.confirmDialog}>
+              <View style={styles.dialogHeader}>
+                <Text style={styles.dialogTitle}>{confirmTitle}</Text>
+              </View>
+              
+              <View style={styles.dialogContent}>
+                <Text style={styles.dialogMessage}>{confirmMessage}:</Text>
+                <View style={styles.dialogDataContainer}>
+                  <Text style={styles.dialogData}>{displayName}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.dialogActions}>
+                <TouchableOpacity 
+                  style={[styles.dialogButton, styles.cancelButton]} 
+                  onPress={handleCancel}
+                >
+                  <Text style={styles.cancelButtonText}>Отмена</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.dialogButton, styles.confirmButton]} 
+                  onPress={handleConfirm}
+                >
+                  <Text style={styles.confirmButtonText}>Подтвердить</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
-      
-      {scanned && (
-        <View style={styles.scannedContainer}>
-          <Text style={styles.scannedText}>QR-код отсканирован!</Text>
-          <TouchableOpacity 
-            style={styles.button} 
-            onPress={() => setScanned(false)}
-          >
-            <Text style={styles.buttonText}>Сканировать еще раз</Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
 };
@@ -171,6 +241,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderRadius: 10,
   },
+  scanAreaScanned: {
+    borderColor: '#4caf50',
+    borderWidth: 3,
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+  },
   instruction: {
     position: 'absolute',
     bottom: 100,
@@ -196,7 +271,18 @@ const styles = StyleSheet.create({
     color: '#4caf50',
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: 10,
+  },
+  scannedDataText: {
+    color: 'white',
+    fontSize: 14,
+    fontFamily: 'monospace',
+    marginBottom: 10,
+  },
+  scannedHintText: {
+    color: '#aaa',
+    fontSize: 12,
+    fontStyle: 'italic',
   },
   message: {
     color: 'white',
@@ -224,6 +310,90 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     color: '#1976d2',
+  },
+  confirmDialogOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  confirmDialog: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 400,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  dialogHeader: {
+    backgroundColor: '#1976d2',
+    padding: 20,
+    alignItems: 'center',
+  },
+  dialogTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  dialogContent: {
+    padding: 24,
+  },
+  dialogMessage: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  dialogDataContainer: {
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  dialogData: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1976d2',
+    fontFamily: 'monospace',
+    textAlign: 'center',
+  },
+  dialogActions: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  dialogButton: {
+    flex: 1,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    borderRightWidth: 1,
+    borderRightColor: '#eee',
+  },
+  confirmButton: {
+    backgroundColor: '#4caf50',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
 

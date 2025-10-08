@@ -80,6 +80,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
       <QRCodeScanner 
         onScan={handleQRScan}
         onClose={() => setShowQRScanner(false)}
+        confirmBeforeLogin={true}
+        confirmTitle="Подтверждение входа"
+        confirmMessage="Войти с идентификатором"
       />
     );
   }

@@ -16,6 +16,7 @@ export interface AuthResponse {
 export interface Resource {
   identificator: string;
   count: number;
+  name?: string;
 }
 
 export interface ExchangeRequest {

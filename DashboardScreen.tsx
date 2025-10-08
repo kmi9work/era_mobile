@@ -8,7 +8,7 @@ import {
   Alert
 } from 'react-native';
 import { Player } from './types';
-import ResourceExchangeScreen from './ResourceExchangeScreen';
+import MyResourcesScreen from './MyResourcesScreen';
 
 interface DashboardScreenProps {
   player: Player;
@@ -16,7 +16,7 @@ interface DashboardScreenProps {
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) => {
-  const [showResourceExchange, setShowResourceExchange] = useState(false);
+  const [showMyResources, setShowMyResources] = useState(false);
 
   const handleLogout = () => {
     Alert.alert(
@@ -33,11 +33,11 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) =
     );
   };
 
-  if (showResourceExchange) {
+  if (showMyResources) {
     return (
-      <ResourceExchangeScreen
+      <MyResourcesScreen
         player={player}
-        onBack={() => setShowResourceExchange(false)}
+        onBack={() => setShowMyResources(false)}
       />
     );
   }
@@ -55,7 +55,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) =
         <View style={styles.playerCard}>
           <Text style={styles.playerName}>{player.name}</Text>
           <Text style={styles.playerType}>{player.player_type || 'Игрок'}</Text>
-          <Text style={styles.playerId}>ID: {player.identificator}</Text>
         </View>
 
         <View style={styles.statsContainer}>
@@ -82,10 +81,10 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) =
           
           <TouchableOpacity 
             style={styles.featureButton} 
-            onPress={() => setShowResourceExchange(true)}
+            onPress={() => setShowMyResources(true)}
           >
-            <Text style={styles.featureButtonText}>🔄 Обмен ресурсами</Text>
-            <Text style={styles.featureButtonSubtext}>Передать ресурсы другому игроку</Text>
+            <Text style={styles.featureButtonText}>📦 Мои ресурсы</Text>
+
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.featureButton} disabled>
