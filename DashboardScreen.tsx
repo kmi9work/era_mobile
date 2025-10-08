@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -8,6 +8,7 @@ import {
   Alert
 } from 'react-native';
 import { Player } from './types';
+import ResourceExchangeScreen from './ResourceExchangeScreen';
 
 interface DashboardScreenProps {
   player: Player;
@@ -15,6 +16,8 @@ interface DashboardScreenProps {
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) => {
+  const [showResourceExchange, setShowResourceExchange] = useState(false);
+
   const handleLogout = () => {
     Alert.alert(
       'Выход',
@@ -29,6 +32,15 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) =
       ]
     );
   };
+
+  if (showResourceExchange) {
+    return (
+      <ResourceExchangeScreen
+        player={player}
+        onBack={() => setShowResourceExchange(false)}
+      />
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -68,6 +80,14 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) =
         <View style={styles.featuresContainer}>
           <Text style={styles.featuresTitle}>Доступные функции</Text>
           
+          <TouchableOpacity 
+            style={styles.featureButton} 
+            onPress={() => setShowResourceExchange(true)}
+          >
+            <Text style={styles.featureButtonText}>🔄 Обмен ресурсами</Text>
+            <Text style={styles.featureButtonSubtext}>Передать ресурсы другому игроку</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.featureButton} disabled>
             <Text style={styles.featureButtonText}>📊 Статистика</Text>
             <Text style={styles.featureButtonSubtext}>Скоро</Text>
@@ -212,7 +232,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     borderRadius: 8,
     marginBottom: 10,
-    opacity: 0.6,
+    opacity: 1,
   },
   featureButtonText: {
     fontSize: 16,
