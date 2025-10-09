@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Player } from './types';
 import MyResourcesScreen from './MyResourcesScreen';
+import MarketScreen from './MarketScreen';
 
 interface DashboardScreenProps {
   player: Player;
@@ -17,6 +18,7 @@ interface DashboardScreenProps {
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) => {
   const [showMyResources, setShowMyResources] = useState(false);
+  const [showMarket, setShowMarket] = useState(false);
 
   const handleLogout = () => {
     Alert.alert(
@@ -38,6 +40,15 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) =
       <MyResourcesScreen
         player={player}
         onBack={() => setShowMyResources(false)}
+      />
+    );
+  }
+
+  if (showMarket) {
+    return (
+      <MarketScreen
+        player={player}
+        onBack={() => setShowMarket(false)}
       />
     );
   }
@@ -84,7 +95,13 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) =
             onPress={() => setShowMyResources(true)}
           >
             <Text style={styles.featureButtonText}>📦 Мои ресурсы</Text>
+          </TouchableOpacity>
 
+          <TouchableOpacity 
+            style={styles.featureButton} 
+            onPress={() => setShowMarket(true)}
+          >
+            <Text style={styles.featureButtonText}>🏪 Рынок</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.featureButton} disabled>

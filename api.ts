@@ -1,5 +1,15 @@
 import axios from 'axios';
-import { Player, AuthResponse, Resource, ExchangeRequest, ExchangeResponse } from './types';
+import { 
+  Player, 
+  AuthResponse, 
+  Resource, 
+  ExchangeRequest, 
+  ExchangeResponse,
+  Country,
+  MarketPrices,
+  MarketTradeRequest,
+  MarketTradeResponse
+} from './types';
 
 const API_BASE_URL = __DEV__ 
   ? 'http://192.168.1.45:3000'  // Для разработки (IP сервера)
@@ -145,6 +155,57 @@ class ApiService {
         success: false,
         error: error.response?.data?.error || error.message || 'Ошибка обмена ресурсами'
       };
+    }
+  }
+
+  // Получение списка иностранных стран
+  async getForeignCountries(): Promise<Country[]> {
+    try {
+      const response = await this.api.get('/countries/foreign_countries.json');
+      return response.data;
+    } catch (error: any) {
+      console.error('Get foreign countries error:', error);
+      return [];
+    }
+  }
+
+  // Получение цен на рынке
+  async getMarketPrices(): Promise<MarketPrices> {
+    try {
+      const response = await this.api.get('/resources/show_prices.json');
+      return response.data.prices;
+    } catch (error: any) {
+      console.error('Get market prices error:', error);
+      return {
+        to_market: [],
+        off_market: []
+      };
+    }
+  }
+
+  // Расчет стоимости каравана (без применения изменений)
+  async calculateCaravan(countryId: number, res_pl_sells: any[], res_pl_buys: any[]): Promise<{ res_to_player: Resource[] }> {
+    try {
+      const response = await this.api.post('/resources/send_caravan', {
+        country_id: countryId,
+        res_pl_sells,
+        res_pl_buys
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Calculate caravan error:', error);
+      throw new Error(error.response?.data?.error || error.message || 'Ошибка расчета стоимости');
+    }
+  }
+
+  // Отправка каравана (торговля на рынке) - для мобильного приложения
+  async marketTrade(playerId: number, request: MarketTradeRequest): Promise<MarketTradeResponse> {
+    try {
+      const response = await this.api.post(`/players/${playerId}/buy_and_sell_res`, request);
+      return response.data;
+    } catch (error: any) {
+      console.error('Market trade error:', error);
+      throw new Error(error.response?.data?.error || error.message || 'Ошибка торговли на рынке');
     }
   }
 }

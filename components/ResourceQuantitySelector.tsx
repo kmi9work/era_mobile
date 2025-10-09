@@ -14,12 +14,14 @@ interface ResourceQuantitySelectorProps {
   resource: Resource;
   onConfirm: (quantity: number) => void;
   onCancel: () => void;
+  isBuying?: boolean; // true если покупаем, false если продаем
 }
 
 const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
   resource,
   onConfirm,
-  onCancel
+  onCancel,
+  isBuying = false
 }) => {
   const [quantity, setQuantity] = useState<number>(0);
   const [inputValue, setInputValue] = useState<string>('0');
@@ -29,7 +31,8 @@ const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
     const num = parseInt(newValue);
     
     if (!isNaN(num) && num >= 0) {
-      const maxQuantity = Math.min(num, resource.count);
+      // Для покупки не ограничиваем количество, для продажи ограничиваем имеющимся количеством
+      const maxQuantity = isBuying ? num : Math.min(num, resource.count);
       setQuantity(maxQuantity);
       setInputValue(maxQuantity.toString());
     }
@@ -53,7 +56,8 @@ const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
   };
 
   const handleIncrement = () => {
-    if (quantity < resource.count) {
+    // Для покупки не ограничиваем, для продажи ограничиваем имеющимся количеством
+    if (isBuying || quantity < resource.count) {
       const newQuantity = quantity + 1;
       setQuantity(newQuantity);
       setInputValue(newQuantity.toString());
@@ -69,8 +73,11 @@ const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
   };
 
   const handleMax = () => {
-    setQuantity(resource.count);
-    setInputValue(resource.count.toString());
+    // Кнопка "Все" работает только при продаже
+    if (!isBuying && resource.count > 0) {
+      setQuantity(resource.count);
+      setInputValue(resource.count.toString());
+    }
   };
 
   const handleConfirm = () => {
@@ -78,7 +85,8 @@ const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
       Alert.alert('Ошибка', 'Выберите количество больше 0');
       return;
     }
-    if (quantity > resource.count) {
+    // Проверяем доступное количество только при продаже
+    if (!isBuying && quantity > resource.count) {
       Alert.alert('Ошибка', 'Нельзя выбрать больше доступного количества');
       return;
     }
@@ -123,21 +131,25 @@ const ResourceQuantitySelector: React.FC<ResourceQuantitySelectorProps> = ({
               </Text>
             </View>
           </View>
-          <View style={styles.resourceCount}>
-            <Text style={styles.resourceCountText}>{resource.count}</Text>
-          </View>
+          {!isBuying && (
+            <View style={styles.resourceCount}>
+              <Text style={styles.resourceCountText}>{resource.count}</Text>
+            </View>
+          )}
         </View>
 
         {/* Выбор количества с клавиатурой */}
         <View style={styles.quantitySection}>
           <View style={styles.quantityHeader}>
             <Text style={styles.quantityTitle}>Выберите количество</Text>
-            <TouchableOpacity
-              style={styles.maxButton}
-              onPress={handleMax}
-            >
-              <Text style={styles.maxButtonText}>Все ({resource.count})</Text>
-            </TouchableOpacity>
+            {!isBuying && (
+              <TouchableOpacity
+                style={styles.maxButton}
+                onPress={handleMax}
+              >
+                <Text style={styles.maxButtonText}>Все ({resource.count})</Text>
+              </TouchableOpacity>
+            )}
           </View>
           
           <View style={styles.quantityDisplayLarge}>
