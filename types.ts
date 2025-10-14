@@ -12,3 +12,20 @@ export interface AuthResponse {
   player?: Player;
   message?: string;
 }
+
+export interface Resource {
+  identificator: string;
+  count: number;
+  name?: string;
+}
+
+export interface ExchangeRequest {
+  with_whom: string;
+  hashed_resources: Resource[];
+}
+
+export interface ExchangeResponse {
+  success: boolean;
+  result?: any;
+  error?: string;
+}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -8,6 +8,7 @@ import {
   Alert
 } from 'react-native';
 import { Player } from './types';
+import MyResourcesScreen from './MyResourcesScreen';
 
 interface DashboardScreenProps {
   player: Player;
@@ -15,6 +16,8 @@ interface DashboardScreenProps {
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) => {
+  const [showMyResources, setShowMyResources] = useState(false);
+
   const handleLogout = () => {
     Alert.alert(
       'Выход',
@@ -30,6 +33,15 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) =
     );
   };
 
+  if (showMyResources) {
+    return (
+      <MyResourcesScreen
+        player={player}
+        onBack={() => setShowMyResources(false)}
+      />
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -43,7 +55,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) =
         <View style={styles.playerCard}>
           <Text style={styles.playerName}>{player.name}</Text>
           <Text style={styles.playerType}>{player.player_type || 'Игрок'}</Text>
-          <Text style={styles.playerId}>ID: {player.identificator}</Text>
         </View>
 
         <View style={styles.statsContainer}>
@@ -68,6 +79,14 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ player, onLogout }) =
         <View style={styles.featuresContainer}>
           <Text style={styles.featuresTitle}>Доступные функции</Text>
           
+          <TouchableOpacity 
+            style={styles.featureButton} 
+            onPress={() => setShowMyResources(true)}
+          >
+            <Text style={styles.featureButtonText}>📦 Мои ресурсы</Text>
+
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.featureButton} disabled>
             <Text style={styles.featureButtonText}>📊 Статистика</Text>
             <Text style={styles.featureButtonSubtext}>Скоро</Text>
@@ -212,7 +231,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     borderRadius: 8,
     marginBottom: 10,
-    opacity: 0.6,
+    opacity: 1,
   },
   featureButtonText: {
     fontSize: 16,
