@@ -1,9 +1,24 @@
 import axios from 'axios';
 import { Player, AuthResponse, Resource, ExchangeRequest, ExchangeResponse } from './types';
+import Constants from 'expo-constants';
 
-const API_BASE_URL = __DEV__ 
-  ? 'http://192.168.1.45:3000'  // Для разработки (IP сервера)
-  : 'https://your-production-domain.com'; // Для продакшена
+// Get backend URL from Expo config or use default
+const getBackendUrl = () => {
+  if (!__DEV__) {
+    return 'https://your-production-domain.com'; // Для продакшена
+  }
+  
+  // Try to get from Expo config first (set by start script)
+  const backendUrl = Constants.expoConfig?.extra?.backendUrl;
+  if (backendUrl) {
+    return backendUrl;
+  }
+  
+  // Fallback to default for development
+  return 'http://192.168.1.101:3000';
+};
+
+const API_BASE_URL = getBackendUrl();
 
 class ApiService {
   private api = axios.create({
